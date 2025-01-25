@@ -34,31 +34,20 @@
     <!-- Search Input with Home Button -->
     <div class="input-group mb-3">
       <input class="form-control" id="searchInput" type="text" placeholder="Search for questions...">
-      <div class="home-icon" id="homeIcon" title="Go to Home">
+      <a href="{% url 'qa_view' %}" class="home-icon" title="Go to Home">
         <i class="fas fa-home"></i>
-      </div>
-    </div>
+    </a>
 
     <ul class="list-group" id="qaList">
-      <!-- Q&A List Items -->
+      <!-- Dynamically Render Q&A Items from Database -->
+      {% for qa in qa_list %}
       <li class="list-group-item">
         <span class="serial"></span>
-        <span class="question">How can I improve my coding skills?</span>
+        <span class="question">{{ qa.question }}</span>
         <br>
-        <span class="answer"> Start by practicing daily, exploring new languages, and building small projects to gain hands-on experience. Eventually, tackle real-world problems. Start by practicing daily, exploring new languages, and building small projects to gain hands-on experience. Eventually, tackle real-world problems.</span>
+        <span class="answer">{{ qa.answer|striptags }}</span> <!-- Remove p and other tags -->
       </li>
-      <li class="list-group-item">
-        <span class="serial"></span>
-        <span class="question">What are the best resources for learning JavaScript?</span>
-        <br>
-        <span class="answer">Check online tutorials, documentation, freeCodeCamp, or platforms like Codecademy and Udemy for structured courses.</span>
-      </li>
-      <li class="list-group-item">
-        <span class="serial"></span>
-        <span class="question">Can you explain the concept of asynchronous programming?</span>
-        <br>
-        <span class="answer">Asynchronous programming allows tasks to run independently of the main program flow, enabling efficient operations, especially in I/O-heavy tasks.</span>
-      </li>
+      {% endfor %}
     </ul>
   </div>
 

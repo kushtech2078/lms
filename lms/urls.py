@@ -17,14 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from capp import views
-from capp.views import function_name
+from capp.views import qa_view
 from django.urls import path
 from capp.views import TableNameListCreateAPIView, TableNameRetrieveUpdateDestroyAPIView, TableNameSearchAPIView
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', views.function_name, name='function_name'),
+    path('', views.qa_view, name='qa_view'),
     path('api/tablename/', TableNameListCreateAPIView.as_view(), name='tablename-list-create'),  # List and Create
     path('api/tablename/<int:pk>/', TableNameRetrieveUpdateDestroyAPIView.as_view(), name='tablename-detail'),  # Retrieve, Update, Delete
     path('api/tablename/search/', TableNameSearchAPIView.as_view(), name='tablename-search'),

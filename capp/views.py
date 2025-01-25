@@ -10,8 +10,10 @@ from rest_framework import status
 from .utils import get_client_ip  # Assuming the get_client_ip function is in utils.py
 from django.http import JsonResponse
 
-def function_name(request):
-   return render(request, 'capp/index.html')
+def qa_view(request):
+    # Fetch all Q&A entries from the database
+    qa_list = TableName.objects.all()
+    return render(request, 'capp/index.html', {'qa_list': qa_list})
 
 # List and Create API
 class TableNameListCreateAPIView(ListCreateAPIView):
