@@ -11,7 +11,7 @@ from .utils import get_client_ip  # Assuming the get_client_ip function is in ut
 from django.http import JsonResponse
 
 def function_name(request):
-  return HttpResponse("abc")
+   return render(request, 'capp/index.html')
 
 # List and Create API
 class TableNameListCreateAPIView(ListCreateAPIView):
