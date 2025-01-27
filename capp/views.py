@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -9,11 +9,55 @@ from rest_framework.response import Response
 from rest_framework import status
 from .utils import get_client_ip  # Assuming the get_client_ip function is in utils.py
 from django.http import JsonResponse
+import openpyxl
 
 def qa_view(request):
     # Fetch all Q&A entries from the database
     qa_list = TableName.objects.all()
     return render(request, 'capp/index.html', {'qa_list': qa_list})
+
+def upload_excel(request):
+    if request.method == 'POST' and request.FILES['file']:
+        excel_file = request.FILES['file']
+        wb = openpyxl.load_workbook(excel_file)
+        sheet = wb.active
+
+        # Loop through the rows in the sheet and save to the database
+        for row in sheet.iter_rows(min_row=2, values_only=True):  # Assuming the first row is a header
+            question, answer = row
+            TableName.objects.create(question=question, answer=answer)
+
+        return redirect('table_name_list')  # Redirect to a list of table data (you can customize this)
+
+    return render(request, 'capp/upload_excel.html')  # Create an HTML form for file upload
+
+def table_name_list(request):
+    # Retrieve all records from the TableName model
+    table_data = TableName.objects.all()
+    return render(request, 'capp/table_name_list.html', {'table_data': table_data})
+
+def download_excel(request):
+    data = TableName.objects.all()
+
+    # Create a new workbook and a sheet to add the data
+    wb = openpyxl.Workbook()
+    sheet = wb.active
+    sheet.title = 'TableName Data'
+
+    # Add headers
+    sheet.append(['Question', 'Answer', 'Created At'])
+
+    # Add the data rows
+    for item in data:
+        sheet.append([item.question, item.answer, item.created_at])
+
+    # Create a response to download the file
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="table_name_data.xlsx"'
+
+    wb.save(response)  # Save the file to the response
+    return response
+
 
 # List and Create API
 class TableNameListCreateAPIView(ListCreateAPIView):

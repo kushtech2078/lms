@@ -25,6 +25,9 @@ from capp.views import TableNameListCreateAPIView, TableNameRetrieveUpdateDestro
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', views.qa_view, name='qa_view'),
+    path('upload_excel/', views.upload_excel, name='upload_excel'),
+    path('download_excel/', views.download_excel, name='download_excel'),
+    path('table_name_list/', views.table_name_list, name='table_name_list'),  # Add this line
     path('api/tablename/', TableNameListCreateAPIView.as_view(), name='tablename-list-create'),  # List and Create
     path('api/tablename/<int:pk>/', TableNameRetrieveUpdateDestroyAPIView.as_view(), name='tablename-detail'),  # Retrieve, Update, Delete
     path('api/tablename/search/', TableNameSearchAPIView.as_view(), name='tablename-search'),
