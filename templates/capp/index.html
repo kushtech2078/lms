@@ -3,20 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questions</title>
+    <title>Responsive Search Box with Cross Icon</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style>
-        /* Style for the clear (X) button inside the input field */
+        /* Search box container */
         .search-container {
             position: relative;
+            display: flex;
+            align-items: center;
             margin-bottom: 10px;
+            width: 100%;  /* Ensures the container takes full width */
         }
+
         #search-box {
             width: 100%;
-            padding: 8px 30px 8px 10px;
+            padding: 8px 30px 8px 10px; /* Adjust padding for space */
         }
+
+        /* Cross icon styling */
         .clear-icon {
             position: absolute;
             right: 10px;
@@ -24,26 +30,51 @@
             transform: translateY(-50%);
             cursor: pointer;
             font-size: 18px;
-            display: none;
+            display: none; /* Initially hidden */
         }
-        .more-less {
-            color: blue;
-            cursor: pointer;
-        }
+
+        /* Home icon styling */
         .home-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             background-color: #007bff;
             color: white;
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
             margin-left: 10px;
-          }
-          .home-icon:hover {
+        }
+
+        .home-icon:hover {
             background-color: #0056b3;
-          }
+        }
+
+        /* More or less link styling */
+        .more-less {
+            color: blue;
+            cursor: pointer;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            #search-box {
+                padding: 8px 20px 8px 10px; /* Adjust padding for smaller screens */
+            }
+
+            .clear-icon {
+                right: 5px; /* Slightly adjust position on smaller screens */
+                font-size: 16px; /* Smaller icon on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-container {
+                padding: 0 5px; /* Adjust container padding */
+            }
+
+            .clear-icon {
+                right: 5px;
+                font-size: 14px; /* Even smaller icon for very small screens */
+            }
+        }
     </style>
 </head>
 <body>
@@ -51,10 +82,14 @@
 <div class="container">
     <p></p>
 
-    <!-- Search Box with Clear Icon -->
+    <!-- Search Box and Home Icon in the same line -->
     <div class="search-container">
         <input type="text" id="search-box" class="form-control" placeholder="Search questions...">
-        <span class="clear-icon" onclick="clearSearch()">✖</span>
+        <span class="clear-icon" id="clear-icon" onclick="clearSearch()">✖</span>
+        <!-- Home icon next to the search box -->
+        <div class="home-icon" id="homeIcon">
+            Home
+        </div>
     </div>
 
     <!-- Nav pills (menu tabs) -->
@@ -100,9 +135,9 @@
         // Show clear (X) icon when user types in search box
         $("#search-box").on("input", function () {
             if ($(this).val().length > 0) {
-                $(".clear-icon").show();
+                $("#clear-icon").show(); // Show the clear icon when there is text
             } else {
-                $(".clear-icon").hide();
+                $("#clear-icon").hide(); // Hide the clear icon when input is empty
             }
         });
     
@@ -152,9 +187,14 @@
         // Function to clear search input
         function clearSearch() {
             $("#search-box").val('');
-            $(".clear-icon").hide();
+            $("#clear-icon").hide(); // Hide the clear icon
             $(".question-item").show(); // Show all items again
         }
+        
+        // Automatically trigger the home button click when hovered
+        $("#homeIcon").hover(function () {
+            goHome(); // Trigger the goHome function on hover
+        });
     });
     
     // Number questions dynamically
@@ -165,8 +205,17 @@
     // Function to clear search input
     function clearSearch() {
         $("#search-box").val('');
-        $(".clear-icon").hide();
+        $("#clear-icon").hide(); // Hide the clear icon
         $(".question-item").show(); // Show all items again
+    }
+
+    // Function to go to the homepage (or top of the page)
+    function goHome() {
+        // You can either redirect to a URL or scroll to the top
+        window.location.href = "/"; // Uncomment to redirect to home page (update URL as needed)
+        
+        // OR, to scroll to the top of the page:
+        // $('html, body').animate({ scrollTop: 0 }, 'slow');
     }
 </script>
 
