@@ -26,7 +26,6 @@ SECRET_KEY = "django-insecure-m&bifknv7j=raq(r31m*+6=0(0hri(@!1uce%@e(dfxt%ar68f
 DEBUG = True
 
 ALLOWED_HOSTS = []
-CSRF_TRUSTED_ORIGINS=['https://lms.kushtech.com.np']
 
 
 # Application definition

@@ -30,20 +30,6 @@
             color: blue;
             cursor: pointer;
         }
-        .home-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #007bff;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-          }
-          .home-icon:hover {
-            background-color: #0056b3;
-          }
     </style>
 </head>
 <body>
@@ -68,6 +54,7 @@
     <div class="tab-content">
         {% for type, questions in questions_by_type.items %}
             <div id="{{ type.id }}" class="tab-pane fade">
+                <h3>{{ type.name }}</h3>
                 <ul class="list-group">
                     {% for question in questions %}
                         <li class="list-group-item question-item">
@@ -91,12 +78,12 @@
     $(document).ready(function () {
         // Make the first tab active by default
         $(".nav-pills li:first-child a").tab('show');
-    
+
         // Automatically click the tab when hovered
         $(".nav-pills li a").hover(function () {
             $(this).tab('show');
         });
-    
+
         // Show clear (X) icon when user types in search box
         $("#search-box").on("input", function () {
             if ($(this).val().length > 0) {
@@ -105,15 +92,15 @@
                 $(".clear-icon").hide();
             }
         });
-    
+
         // Live Search Functionality
         $("#search-box").on("keyup", function () {
             let searchText = $(this).val().toLowerCase();
-    
+
             $(".question-item").each(function () {
                 let questionText = $(this).find(".question-text").text().toLowerCase();
                 let answerText = $(this).find(".answer-text").text().toLowerCase();
-    
+
                 if (questionText.includes(searchText) || answerText.includes(searchText)) {
                     $(this).show();
                 } else {
@@ -121,42 +108,78 @@
                 }
             });
         });
-    
-        // Toggle answer view (expand/collapse) when clicking or touching the list item
-        $(".question-item").on('touchstart click', function () {
+
+        // Toggle answer view (more/less) when clicking the list item
+        $(".question-item").click(function () {
             var answerText = $(this).find(".answer-text");
             var fullAnswer = answerText.find(".answer-full");
             var preview = answerText.find(".answer-preview");
-    
+            var moreLess = answerText.find(".more-less");
+
             if (fullAnswer.is(":visible")) {
                 preview.show();
                 fullAnswer.hide();
+                moreLess.first().text("more");
+                moreLess.last().hide();
             } else {
                 preview.hide();
                 fullAnswer.show();
+                moreLess.first().text("less");
+                moreLess.last().show();
             }
-    
+
             // Close other open answers
             $(".question-item").not(this).each(function () {
                 var otherAnswerText = $(this).find(".answer-text");
                 var otherFullAnswer = otherAnswerText.find(".answer-full");
                 var otherPreview = otherAnswerText.find(".answer-preview");
-    
+                var otherMoreLess = otherAnswerText.find(".more-less");
+
                 if (otherFullAnswer.is(":visible")) {
                     otherPreview.show();
                     otherFullAnswer.hide();
+                    otherMoreLess.first().text("more");
+                    otherMoreLess.last().hide();
                 }
             });
         });
-    
-        // Function to clear search input
-        function clearSearch() {
-            $("#search-box").val('');
-            $(".clear-icon").hide();
-            $(".question-item").show(); // Show all items again
-        }
+
+        // Automatically expand the answer on touch/click (no need for "more"/"less")
+        $(".question-item").on('touchstart click', function () {
+            var answerText = $(this).find(".answer-text");
+            var fullAnswer = answerText.find(".answer-full");
+            var preview = answerText.find(".answer-preview");
+            var moreLess = answerText.find(".more-less");
+
+            if (fullAnswer.is(":visible")) {
+                preview.show();
+                fullAnswer.hide();
+                moreLess.first().text("more");
+                moreLess.last().hide();
+            } else {
+                preview.hide();
+                fullAnswer.show();
+                moreLess.first().text("less");
+                moreLess.last().show();
+            }
+
+            // Close other open answers
+            $(".question-item").not(this).each(function () {
+                var otherAnswerText = $(this).find(".answer-text");
+                var otherFullAnswer = otherAnswerText.find(".answer-full");
+                var otherPreview = otherAnswerText.find(".answer-preview");
+                var otherMoreLess = otherAnswerText.find(".more-less");
+
+                if (otherFullAnswer.is(":visible")) {
+                    otherPreview.show();
+                    otherFullAnswer.hide();
+                    otherMoreLess.first().text("more");
+                    otherMoreLess.last().hide();
+                }
+            });
+        });
     });
-    
+
     // Number questions dynamically
     $(".tab-pane .list-group .question-item").each(function (index) {
         $(this).find(".question-number").text(index + 1 + ".");
