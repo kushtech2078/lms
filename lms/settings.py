@@ -127,11 +127,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CKEDITOR_CONFIGS = {
     'default': {
-        'toolbar': 'Basic',  # You can select from other pre-configured toolbar options
-        'height': 300,  # Set the height of the editor
-        'width': '100%',  # Set the width of the editor
-        'removePlugins': 'elementspath,globalcounter',  # Remove unwanted plugins like 'globalcounter'
-        'extraPlugins': 'autogrow',  # Example to add more plugins if needed
-        'autogrow_maxHeight': 600,  # For auto-growing height
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline'],
+            ['NumberedList', 'BulletedList'],
+            ['Link', 'Unlink'],
+            ['RemoveFormat', 'Source']
+        ]
     }
 }

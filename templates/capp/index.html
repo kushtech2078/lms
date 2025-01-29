@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Search</title>
+
+    <!-- External CSS and JS Links -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
     <style>
         /* Search box container */
         .search-container {
@@ -14,12 +18,12 @@
             display: flex;
             align-items: center;
             margin-bottom: 10px;
-            width: 100%;  /* Ensures the container takes full width */
+            width: 100%;
         }
 
         #search-box {
             width: 100%;
-            padding: 8px 30px 8px 10px; /* Adjust padding for space */
+            padding: 8px 30px 8px 10px;
         }
 
         /* Cross icon styling */
@@ -30,7 +34,7 @@
             transform: translateY(-50%);
             cursor: pointer;
             font-size: 18px;
-            display: none; /* Initially hidden */
+            display: none;
         }
 
         /* Home icon styling */
@@ -56,168 +60,171 @@
         /* Responsive design for smaller screens */
         @media (max-width: 768px) {
             #search-box {
-                padding: 8px 20px 8px 10px; /* Adjust padding for smaller screens */
+                padding: 8px 20px 8px 10px;
             }
 
             .clear-icon {
-                right: 5px; /* Slightly adjust position on smaller screens */
-                font-size: 16px; /* Smaller icon on smaller screens */
+                right: 5px;
+                font-size: 16px;
             }
         }
 
         @media (max-width: 480px) {
             .search-container {
-                padding: 0 5px; /* Adjust container padding */
+                padding: 0 5px;
             }
 
             .clear-icon {
                 right: 5px;
-                font-size: 14px; /* Even smaller icon for very small screens */
+                font-size: 14px;
             }
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <p></p>
+    <div class="container">
+        <p></p>
 
-    <!-- Search Box and Home Icon in the same line -->
-    <div class="search-container">
-        <input type="text" id="search-box" class="form-control" placeholder="Search questions...">
-        <span class="clear-icon" id="clear-icon" onclick="clearSearch()">✖</span>
-        <!-- Home icon next to the search box -->
-        <div class="home-icon" id="homeIcon">
-            Home
+        <!-- Search Box and Home Icon in the same line -->
+        <div class="search-container">
+            <input type="text" id="search-box" class="form-control" placeholder="Search questions...">
+            <span class="clear-icon" id="clear-icon" onclick="clearSearch()">✖</span>
+            <!-- Home icon next to the search box -->
+            <div class="home-icon" id="homeIcon">
+                Home
+            </div>
+        </div>
+
+        <!-- Nav pills (menu tabs) -->
+        <ul class="nav nav-pills">
+            {% for type in types %}
+                <li><a data-toggle="pill" href="#{{ type.id }}">{{ type.name }}</a></li>
+            {% endfor %}
+        </ul>
+
+        <!-- Tab content -->
+        <div class="tab-content">
+            {% for type, questions in questions_by_type.items %}
+                <div id="{{ type.id }}" class="tab-pane fade">
+                    <ul class="list-group">
+                        {% for question in questions %}
+                            <li class="list-group-item question-item">
+                                <strong class="question-number">{{ global_counter }}.</strong>
+                                <strong class="question-text">{{ question.question }}</strong>
+                                <p class="answer-text">
+                                    <span class="answer-preview">{{ question.answer|truncatewords:22 }}</span>
+                                    <span class="more-less">more</span>
+                                    <span class="answer-full" style="display:none;">{{ question.answer|safe }}</span>
+                                    <span class="more-less" style="display:none;">less</span>
+                                </p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
         </div>
     </div>
 
-    <!-- Nav pills (menu tabs) -->
-    <ul class="nav nav-pills">
-        {% for type in types %}
-            <li><a data-toggle="pill" href="#{{ type.id }}">{{ type.name }}</a></li>
-        {% endfor %}
-    </ul>
+    <!-- Script Section -->
+    <script>
+        $(document).ready(function () {
+            // Make the first tab active by default
+            $(".nav-pills li:first-child a").tab('show');
 
-    <!-- Tab content -->
-    <div class="tab-content">
-        {% for type, questions in questions_by_type.items %}
-            <div id="{{ type.id }}" class="tab-pane fade">
-                <ul class="list-group">
-                    {% for question in questions %}
-                        <li class="list-group-item question-item">
-                            <strong class="question-number">{{ global_counter }}.</strong> 
-                            <strong class="question-text">{{ question.question }}</strong>
-                            <p class="answer-text">
-                                <span class="answer-preview">{{ question.answer|truncatewords:22 }}</span>
-                                <span class="more-less">more</span>
-                                <span class="answer-full" style="display:none;">{{ question.answer|safe }}</span>
-                                <span class="more-less" style="display:none;">less</span>
-                            </p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endfor %}
-    </div>
-</div>
+            // Automatically click the tab when hovered
+            $(".nav-pills li a").hover(function () {
+                $(this).tab('show');
+            });
 
-<script>
-    $(document).ready(function () {
-        // Make the first tab active by default
-        $(".nav-pills li:first-child a").tab('show');
-    
-        // Automatically click the tab when hovered
-        $(".nav-pills li a").hover(function () {
-            $(this).tab('show');
-        });
-    
-        // Show clear (X) icon when user types in search box
-        $("#search-box").on("input", function () {
-            if ($(this).val().length > 0) {
-                $("#clear-icon").show(); // Show the clear icon when there is text
-            } else {
-                $("#clear-icon").hide(); // Hide the clear icon when input is empty
-            }
-        });
-    
-        // Live Search Functionality
-        $("#search-box").on("keyup", function () {
-            let searchText = $(this).val().toLowerCase();
-    
-            $(".question-item").each(function () {
-                let questionText = $(this).find(".question-text").text().toLowerCase();
-                let answerText = $(this).find(".answer-text").text().toLowerCase();
-    
-                if (questionText.includes(searchText) || answerText.includes(searchText)) {
-                    $(this).show();
+            // Show clear (X) icon when user types in search box
+            $("#search-box").on("input", function () {
+                if ($(this).val().length > 0) {
+                    $("#clear-icon").show(); // Show the clear icon when there is text
                 } else {
-                    $(this).hide();
+                    $("#clear-icon").hide(); // Hide the clear icon when input is empty
                 }
             });
-        });
-    
-        // Toggle answer view (expand/collapse) when clicking or touching the list item
-        $(".question-item").on('touchstart click', function () {
-            var answerText = $(this).find(".answer-text");
-            var fullAnswer = answerText.find(".answer-full");
-            var preview = answerText.find(".answer-preview");
-    
-            if (fullAnswer.is(":visible")) {
-                preview.show();
-                fullAnswer.hide();
-            } else {
-                preview.hide();
-                fullAnswer.show();
+
+            // Live Search Functionality
+            $("#search-box").on("keyup", function () {
+                let searchText = $(this).val().toLowerCase();
+
+                $(".question-item").each(function () {
+                    let questionText = $(this).find(".question-text").text().toLowerCase();
+                    let answerText = $(this).find(".answer-text").text().toLowerCase();
+
+                    if (questionText.includes(searchText) || answerText.includes(searchText)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            // Toggle answer view (expand/collapse) when clicking or touching the list item
+            $(".question-item").on('touchstart click', function () {
+                var answerText = $(this).find(".answer-text");
+                var fullAnswer = answerText.find(".answer-full");
+                var preview = answerText.find(".answer-preview");
+
+                if (fullAnswer.is(":visible")) {
+                    preview.show();
+                    fullAnswer.hide();
+                } else {
+                    preview.hide();
+                    fullAnswer.show();
+                }
+
+                // Close other open answers
+                $(".question-item").not(this).each(function () {
+                    var otherAnswerText = $(this).find(".answer-text");
+                    var otherFullAnswer = otherAnswerText.find(".answer-full");
+                    var otherPreview = otherAnswerText.find(".answer-preview");
+
+                    if (otherFullAnswer.is(":visible")) {
+                        otherPreview.show();
+                        otherFullAnswer.hide();
+                    }
+                });
+            });
+
+            // Function to clear search input
+            function clearSearch() {
+                $("#search-box").val('');
+                $("#clear-icon").hide(); // Hide the clear icon
+                $(".question-item").show(); // Show all items again
             }
-    
-            // Close other open answers
-            $(".question-item").not(this).each(function () {
-                var otherAnswerText = $(this).find(".answer-text");
-                var otherFullAnswer = otherAnswerText.find(".answer-full");
-                var otherPreview = otherAnswerText.find(".answer-preview");
-    
-                if (otherFullAnswer.is(":visible")) {
-                    otherPreview.show();
-                    otherFullAnswer.hide();
-                }
+
+            // Automatically trigger the home button click when hovered
+            $("#homeIcon").hover(function () {
+                goHome(); // Trigger the goHome function on hover
             });
         });
-    
+
+        // Number questions dynamically
+        $(".tab-pane .list-group .question-item").each(function (index) {
+            $(this).find(".question-number").text(index + 1 + ".");
+        });
+
         // Function to clear search input
         function clearSearch() {
             $("#search-box").val('');
             $("#clear-icon").hide(); // Hide the clear icon
             $(".question-item").show(); // Show all items again
         }
-        
-        // Automatically trigger the home button click when hovered
-        $("#homeIcon").hover(function () {
-            goHome(); // Trigger the goHome function on hover
-        });
-    });
-    
-    // Number questions dynamically
-    $(".tab-pane .list-group .question-item").each(function (index) {
-        $(this).find(".question-number").text(index + 1 + ".");
-    });
 
-    // Function to clear search input
-    function clearSearch() {
-        $("#search-box").val('');
-        $("#clear-icon").hide(); // Hide the clear icon
-        $(".question-item").show(); // Show all items again
-    }
+        // Function to go to the homepage (or top of the page)
+        function goHome() {
+            // You can either redirect to a URL or scroll to the top
+            window.location.href = "/"; // Uncomment to redirect to home page (update URL as needed)
 
-    // Function to go to the homepage (or top of the page)
-    function goHome() {
-        // You can either redirect to a URL or scroll to the top
-        window.location.href = "/"; // Uncomment to redirect to home page (update URL as needed)
-        
-        // OR, to scroll to the top of the page:
-        // $('html, body').animate({ scrollTop: 0 }, 'slow');
-    }
-</script>
+            // OR, to scroll to the top of the page:
+            // $('html, body').animate({ scrollTop: 0 }, 'slow');
+        }
+    </script>
 
 </body>
+
 </html>
