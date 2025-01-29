@@ -1,131 +1,47 @@
+# views.py
 from django.shortcuts import render, redirect
+from .models import Type, Question
 from django.http import HttpResponse
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from .models import TableName, DeviceTracking
-from .serializers import TableNameSerializer, DeviceTrackingSerializer
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .utils import get_client_ip  # Assuming the get_client_ip function is in utils.py
-from django.http import JsonResponse
-import openpyxl
+import pandas as pd
+from .forms import ExcelUploadForm
 
-def qa_view(request):
-    # Fetch all Q&A entries from the database
-    qa_list = TableName.objects.all()
-    return render(request, 'capp/index.html', {'qa_list': qa_list})
-
-def upload_excel(request):
-    if request.method == 'POST' and request.FILES['file']:
-        excel_file = request.FILES['file']
-        wb = openpyxl.load_workbook(excel_file)
-        sheet = wb.active
-
-        # Loop through the rows in the sheet and save to the database
-        for row in sheet.iter_rows(min_row=2, values_only=True):  # Assuming the first row is a header
-            question, answer = row
-            TableName.objects.create(question=question, answer=answer)
-
-        return redirect('table_name_list')  # Redirect to a list of table data (you can customize this)
-
-    return render(request, 'capp/upload_excel.html')  # Create an HTML form for file upload
-
-def table_name_list(request):
-    # Retrieve all records from the TableName model
-    table_data = TableName.objects.all()
-    return render(request, 'capp/table_name_list.html', {'table_data': table_data})
-
-def download_excel(request):
-    data = TableName.objects.all()
-
-    # Create a new workbook and a sheet to add the data
-    wb = openpyxl.Workbook()
-    sheet = wb.active
-    sheet.title = 'TableName Data'
-
-    # Add headers
-    sheet.append(['Question', 'Answer', 'Created At'])
-
-    # Add the data rows
-    for item in data:
-        sheet.append([item.question, item.answer, item.created_at])
-
-    # Create a response to download the file
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="table_name_data.xlsx"'
-
-    wb.save(response)  # Save the file to the response
-    return response
-
-
-# List and Create API
-class TableNameListCreateAPIView(ListCreateAPIView):
-    queryset = TableName.objects.all()
-    serializer_class = TableNameSerializer
-
-    # Add search and sorting capabilities
-    filter_backends = [SearchFilter, OrderingFilter]
-
-    # Specify fields for searching
-    search_fields = ['question', 'answer']  # Fields to search in
-
-    # Specify fields for ordering
-    ordering_fields = ['created_at', 'question']  # Fields to sort by
-    ordering = ['created_at']  # Default ordering
-
-# Retrieve, Update, and Delete API
-class TableNameRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    queryset = TableName.objects.all()
-    serializer_class = TableNameSerializer
-
-class TableNameSearchAPIView(ListAPIView):
-    queryset = TableName.objects.all()
-    serializer_class = TableNameSerializer
-    filter_backends = [SearchFilter]
-    search_fields = ['question', 'answer']  # Allow searching in both 'question' and 'answer'
-
-
-class TableNameSearchAPIView(APIView):
-    def get(self, request):
-      question_query = request.GET.get('question', None)  # Search for question
-      answer_query = request.GET.get('answer', None)  # Search for answer
-      
-      if question_query:
-        queryset = TableName.objects.filter(question__icontains=question_query)
-      elif answer_query:
-        queryset = TableName.objects.filter(answer__icontains=answer_query)
-      else:
-        queryset = TableName.objects.all()  # Return all if no search is applied
-
-      serializer = TableNameSerializer(queryset, many=True)
-      return Response(serializer.data, status=status.HTTP_200_OK)
-
-def track_device(request):
-    ip_address = get_client_ip(request)  # Get the client's IP address
-    mac_address = request.GET.get('mac_address')  # Assuming MAC address is passed in the URL
-    device = DeviceTracking.objects.create(ip_address=ip_address, mac_address=mac_address)
-    return JsonResponse({'message': 'Device tracked successfully', 'ip_address': ip_address})
-
-class DeviceTrackingAPIView(APIView):
-    def post(self, request):
-        # Get the client IP and MAC address from request
-        ip_address = get_client_ip(request)
-        mac_address = request.META.get('HTTP_X_MAC_ADDRESS', None)  # Retrieve from the header
-
-        # Save the information in the database
-        DeviceTracking.objects.create(
-            ip_address=ip_address,
-            mac_address=mac_address
-        )
-
-        return Response({"status": "saved"}, status=200)
+def question_list(request):
+    # Get all types
+    types = Type.objects.all()
     
-class DeviceTrackingView(APIView):
-    def post(self, request):
-        ip_address = get_client_ip(request)  # Get the client's IP address
-        mac_address = request.data.get('mac_address')  # Assuming MAC address is sent in POST data
+    # Get questions grouped by type
+    questions_by_type = {}
+    for type_obj in types:
+        questions_by_type[type_obj] = Question.objects.filter(type=type_obj)
+    
+    return render(request, 'capp/index.html', {'questions_by_type': questions_by_type, 'types': types})
 
-        # Create and save the device info
-        device = DeviceTracking.objects.create(ip_address=ip_address, mac_address=mac_address)
-        return Response({'message': 'Device tracked successfully', 'ip_address': ip_address}, status=status.HTTP_201_CREATED)
+def handle_uploaded_file(file):
+    # Read the Excel file
+    df = pd.read_excel(file)
+
+    # Iterate over the rows of the dataframe and save data
+    for index, row in df.iterrows():
+        type_name = row["Type"].strip()  # Get type name from the row
+        question_text = row["Question"].strip()  # Get question text
+        answer_text = row["Answer"].strip()  # Get answer text
+
+        # Get or create the Type instance based on the type name
+        question_type, _ = Type.objects.get_or_create(name=type_name)
+
+        # Create a Question instance and save it
+        Question.objects.create(type=question_type, question=question_text, answer=answer_text)
+
+# View to handle the Excel file upload
+def upload_excel(request):
+    if request.method == 'POST' and request.FILES['excel_file']:
+        excel_file = request.FILES['excel_file']
+        try:
+            # Call the function to process the uploaded file
+            handle_uploaded_file(excel_file)
+            return HttpResponse("Excel file imported successfully.")
+        except Exception as e:
+            return HttpResponse(f"Error: {e}")
+
+    form = ExcelUploadForm()
+    return render(request, 'capp/upload_excel.html', {'form': form})

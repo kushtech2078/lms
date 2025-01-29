@@ -1,18 +1,18 @@
 from django.db import models
 from ckeditor.fields import RichTextField
 
-class TableName(models.Model):
-    question = models.CharField(max_length=255, null=False, blank=False)
-    answer = RichTextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+# Define the Type model (as done above)
+class Type(models.Model):
+    name = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.question
-    
-class DeviceTracking(models.Model):
-    ip_address = models.GenericIPAddressField()
-    mac_address = models.CharField(max_length=17, null=True, blank=True)  # MAC address is 17 characters long
-    created_at = models.DateTimeField(auto_now_add=True)
+        return self.name
+
+# Define the Question model with a ForeignKey to the Type model
+class Question(models.Model):
+    type = models.ForeignKey(Type, on_delete=models.CASCADE)  # ForeignKey field
+    question = models.TextField()  # The question itself
+    answer = RichTextField()  # The answer to the question
 
     def __str__(self):
-        return f"IP: {self.ip_address} - MAC: {self.mac_address} - Time: {self.created_at}"
+        return f"Question: {self.question}"

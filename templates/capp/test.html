@@ -26,16 +26,16 @@
             font-size: 18px;
             display: none;
         }
-        .more-less {
-            color: blue;
-            cursor: pointer;
+        .question-number {
+            font-weight: bold;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <p></p>
+    <h2>Questions</h2>
 
     <!-- Search Box with Clear Icon -->
     <div class="search-container">
@@ -58,14 +58,11 @@
                 <ul class="list-group">
                     {% for question in questions %}
                         <li class="list-group-item question-item">
-                            <strong class="question-number">{{ global_counter }}.</strong> 
-                            <strong class="question-text">{{ question.question }}</strong>
-                            <p class="answer-text">
-                                <span class="answer-preview">{{ question.answer|truncatewords:22 }}</span>
-                                <span class="more-less">more</span>
-                                <span class="answer-full" style="display:none;">{{ question.answer|safe }}</span>
-                                <span class="more-less" style="display:none;">less</span>
-                            </p>
+                            <strong class="question-text">
+                                <span class="question-number"></span>
+                                {{ question.question }}
+                            </strong>
+                            <p class="answer-text">{{ question.answer }}</p>
                         </li>
                     {% endfor %}
                 </ul>
@@ -104,45 +101,10 @@
             });
         });
 
-        // Toggle answer view (more/less) when clicking the list item
-        $(".question-item").click(function () {
-            var answerText = $(this).find(".answer-text");
-            var fullAnswer = answerText.find(".answer-full");
-            var preview = answerText.find(".answer-preview");
-            var moreLess = answerText.find(".more-less");
-
-            if (fullAnswer.is(":visible")) {
-                preview.show();
-                fullAnswer.hide();
-                moreLess.first().text("more");
-                moreLess.last().hide();
-            } else {
-                preview.hide();
-                fullAnswer.show();
-                moreLess.first().text("less");
-                moreLess.last().show();
-            }
-
-            // Close other open answers
-            $(".question-item").not(this).each(function () {
-                var otherAnswerText = $(this).find(".answer-text");
-                var otherFullAnswer = otherAnswerText.find(".answer-full");
-                var otherPreview = otherAnswerText.find(".answer-preview");
-                var otherMoreLess = otherAnswerText.find(".more-less");
-
-                if (otherFullAnswer.is(":visible")) {
-                    otherPreview.show();
-                    otherFullAnswer.hide();
-                    otherMoreLess.first().text("more");
-                    otherMoreLess.last().hide();
-                }
-            });
+        // Number questions dynamically
+        $(".tab-pane .list-group .question-item").each(function (index) {
+            $(this).find(".question-number").text(index + 1 + ".");
         });
-    });
-
-    // Number questions dynamically
-    $(".tab-pane .list-group .question-item").each(function (index) {
-        $(this).find(".question-number").text(index + 1 + ".");
     });
 
     // Function to clear search input
