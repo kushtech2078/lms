@@ -110,25 +110,60 @@
                 <div id="{{ type.id }}" class="tab-pane fade">
                     <ul class="list-group">
                         {% for question in questions %}
-                            <li class="list-group-item question-item">
-                                <strong class="question-number">{{ global_counter }}.</strong>
-                                <strong class="question-text">{{ question.question }}</strong>
-                                <p class="answer-text">
-                                    <span class="answer-preview">{{ question.answer|truncatewords:22 }}</span>
-                                    <span class="more-less">more</span>
-                                    <span class="answer-full" style="display:none;">{{ question.answer|safe }}</span>
-                                    <span class="more-less" style="display:none;">less</span>
-                                </p>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
+                            <div class="question-answer">
+                                <p><strong>{{ global_counter }} {{ question.question }}</strong></p>
+                                
+                                <div class="answer">
+                                    <div class="short-answer">{{ question.answer|safe }}</div>
+                                    <div class="full-answer hidden">{{ question.answer|safe }}</div>
 
-    <!-- Script Section -->
-    <script>
+                                    {% if question.answer|wordcount > 3 %}
+                                        <span class="more-btn" onclick="toggleAnswer(this)">More</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <style>
+                            .hidden { display: none; }
+                            .more-btn { color: blue; cursor: pointer; text-decoration: underline; }
+                        </style>
+                                            </ul>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+<!-- Script Section -->
+<script>
+    function toggleAnswer(btn) {
+        let answerDiv = btn.parentElement;
+        let shortAnswer = answerDiv.querySelector('.short-answer');
+        let fullAnswer = answerDiv.querySelector('.full-answer');
+
+        if (fullAnswer.classList.contains('hidden')) {
+            shortAnswer.style.display = "none";
+            fullAnswer.classList.remove('hidden');
+            btn.innerText = "Less";
+        } else {
+            shortAnswer.style.display = "block";
+            fullAnswer.classList.add('hidden');
+            btn.innerText = "More";
+        }
+    }
+
+    // Function to truncate words while preserving HTML
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".short-answer").forEach((element) => {
+            let fullHtml = element.innerHTML;
+            let words = fullHtml.split(/\s+/); // Split by spaces
+            if (words.length > 3) {
+                let truncatedHtml = words.slice(0, 3).join(" ") + "...";
+                element.innerHTML = truncatedHtml;
+            }
+        });
+    });
+        
         $(document).ready(function () {
             // Make the first tab active by default
             $(".nav-pills li:first-child a").tab('show');
